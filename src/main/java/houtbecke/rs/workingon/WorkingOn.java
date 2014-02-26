@@ -196,7 +196,7 @@ public class WorkingOn {
      * @param moduleClasses Classes of the modules to override and/or load.
      */
     public static void loadModules(Application application, boolean onlyOverrideWhenInDebugMode, Class<? extends Module>... moduleClasses) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (onlyOverrideWhenInDebugMode && !isInDebugMode(application)) {
+        if (onlyOverrideWhenInDebugMode && !isInDebugMode(application) && !isTesting) {
             Module[] modules = new Module[moduleClasses.length + 1];
             modules[0] = RoboGuice.newDefaultRoboModule(application);
             for (int k=0; k < moduleClasses.length; k++) {
