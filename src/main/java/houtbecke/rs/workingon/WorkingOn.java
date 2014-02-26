@@ -90,16 +90,31 @@ public class WorkingOn {
      */
     public static Set<Module> extraModules = new LinkedHashSet<Module>(0);
 
+    /**
+     *
+     * Indicates if the application is under testing. If it is, the call to initConfigClass
+     * will be ignored, letting the test do all configuration itself.
+     *
+     */
+    public static boolean isTesting = false;
 
-    public static void initClass(Class c) {
+    private static void initConfigClass(Class c) {
+        if (isTesting) return;
         try {
             c.newInstance();
         } catch (Exception ignore) {}
     }
 
-    public static void initClass(String name) {
+    /**
+     * Instantiates a configuration class. Will only do so when the application is not under test
+     * as indicated by isTesting
+     *
+     * @param name The name class file of the class to instantiate
+     */
+    public static void initConfigClass(String name) {
+        if (isTesting) return;
         try {
-            initClass(Class.forName(name));
+            initConfigClass(Class.forName(name));
         } catch (ClassNotFoundException ignore) {
         }
     }
