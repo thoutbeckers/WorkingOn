@@ -107,11 +107,22 @@ public class WorkingOn {
 
     /**
      * Instantiates a configuration class. Will only do so when the application is not under test
-     * as indicated by isTesting
+     * as indicated by isTesting or the System property testClass. If such a property does exist
+     * configuration is done from that class by passing it to configureTestTasks.
      *
      * @param name The name class file of the class to instantiate
      */
     public static void initConfigClass(String name) {
+        String testClass = System.getProperty("testClass");
+        if (testClass != null) {
+            isTesting = true;
+            try {
+                configureTestTasks(Class.forName(testClass));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
         if (isTesting) return;
         try {
             initConfigClass(Class.forName(name));
@@ -301,5 +312,13 @@ public class WorkingOn {
     }
 
 
+    public static Class<?> configureTestTasks(Class<?> testClass) {
 
+        isTesting = true;
+        WorkingOnTasks annotatedTasks = testClass.getAnnotation(WorkingOnTasks.class);
+        if (annotatedTasks != null)
+            for (String task: annotatedTasks.value())
+                tasks.add(task);
+        return testClass;
+    }
 }
