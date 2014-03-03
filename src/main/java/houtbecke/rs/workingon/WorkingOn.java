@@ -115,6 +115,7 @@ public class WorkingOn {
     public static void initConfigClass(String name) {
         String testClass = System.getProperty("testClass");
         if (testClass != null) {
+            System.out.println("using test class: "+testClass);
             isTesting = true;
             try {
                 configureTestTasks(Class.forName(testClass));
@@ -319,6 +320,20 @@ public class WorkingOn {
         if (annotatedTasks != null)
             for (String task: annotatedTasks.value())
                 tasks.add(task);
+
+        WorkingOnFragment annotatedFragment =testClass.getAnnotation(WorkingOnFragment.class);
+        if (annotatedFragment != null)
+            WorkingOn.fragmentClass = annotatedFragment.value();
+        else WorkingOn.fragmentClass = null;
+
+        WorkingOnActivity annotatedActivity = testClass.getAnnotation(WorkingOnActivity.class);
+        if (annotatedActivity != null)
+            try {
+                WorkingOn.activity = annotatedActivity.value().newInstance();
+            } catch (Exception e) {
+                // ignore Activities with incorrect constructors
+            }
+
         return testClass;
     }
 }
