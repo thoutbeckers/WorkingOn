@@ -11,9 +11,12 @@ import com.google.inject.util.Modules;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,10 +88,20 @@ public class WorkingOn {
      * The extra modules that should be loaded in addition to the ones passed to loadModules.
      *
      * If the onlyOverrideWhenInDebugMode flag is passed to loadModules and the application is not
-     * debuggable the extra modules specified here will not be loaded.
+     * debuggable or running in test mode the extra modules specified here will not be loaded.
      *
      */
     public static Set<Module> extraModules = new LinkedHashSet<Module>(0);
+
+    /**
+     * The classes of extra modules that should be loaded in addition to the ones passed to loadModules.
+     *
+     * If the onlyOverrideWhenInDebugMode flag is passed to loadModules and the application is not
+     * debuggable or running in test mode the extra modules specified here will not be loaded.
+     *
+     */
+    public static Set<Class<? extends Module>> extraModuleClasses = new LinkedHashSet<Class<? extends Module>>(0);
+
 
     /**
      *
@@ -218,12 +231,16 @@ public class WorkingOn {
             return;
         }
 
+
         Set<Module> modules = new LinkedHashSet<Module>();
         Set<String> packages = new HashSet<String>();
-        modules.add(RoboGuice.newDefaultRoboModule(application));
         Map<Class<? extends Module>, Module> rootModuleOverrides = new HashMap<Class<? extends Module>, Module>();
 
-        for (Class moduleClass: moduleClasses) {
+        List<Class<? extends Module>> modulesToAdd = new ArrayList<Class<? extends Module>>();
+        modulesToAdd.addAll(Arrays.asList(moduleClasses));
+        modulesToAdd.addAll(extraModuleClasses);
+
+        for (Class<? extends Module> moduleClass: moduleClasses) {
             String packageName = moduleClass.getPackage().getName();
             if (!packages.contains(packageName))
                 for (String task: tasks)
@@ -278,7 +295,9 @@ public class WorkingOn {
                 addModule(application, modules, moduleClass.getName(), null, null);
 
         }
+
         modules.addAll(extraModules);
+        modules.add(RoboGuice.newDefaultRoboModule(application));
         RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[]{}));
 
     }
@@ -313,18 +332,33 @@ public class WorkingOn {
     }
 
 
-    public static Class<?> configureTestTasks(Class<?> testClass) {
+    /**
+     * Configure WorkingOn fields by reading the WorkingOnActivity, WorkingOnFragments,
+     * WorkingOnModules and WorkingOnTasks.
+     *
+     * This resets any previous configuration that was set, and sets the isTesting field to true.
+     *
+     * @param testClass the testClass that will be scanned for annotations
+     */
+    public static void configureTestTasks(Class<?> testClass) {
 
         isTesting = true;
+
+        tasks.clear();
+        extraModules.clear();
+        extraModuleClasses.clear();
+        WorkingOn.fragmentClass = null;
+        WorkingOn.activity = null;
+
         WorkingOnTasks annotatedTasks = testClass.getAnnotation(WorkingOnTasks.class);
         if (annotatedTasks != null)
             for (String task: annotatedTasks.value())
                 tasks.add(task);
 
+
         WorkingOnFragment annotatedFragment =testClass.getAnnotation(WorkingOnFragment.class);
         if (annotatedFragment != null)
             WorkingOn.fragmentClass = annotatedFragment.value();
-        else WorkingOn.fragmentClass = null;
 
         WorkingOnActivity annotatedActivity = testClass.getAnnotation(WorkingOnActivity.class);
         if (annotatedActivity != null)
@@ -334,6 +368,10 @@ public class WorkingOn {
                 // ignore Activities with incorrect constructors
             }
 
-        return testClass;
+        WorkingOnModules annotatedModules = testClass.getAnnotation(WorkingOnModules.class);
+        if (annotatedModules != null) {
+            extraModuleClasses.addAll(Arrays.asList(annotatedModules.value()));
+        }
+
     }
 }
