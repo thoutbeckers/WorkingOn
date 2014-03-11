@@ -28,5 +28,10 @@ android {
 }
 
 dependencies {
-    provided 'org.roboguice:roboguice:2.0'
+    provided ('org.roboguice:roboguice:2.0') {
+        exclude group:"aopalliance"
+        exclude group:"cglib"
+        exclude group:"org.ow2.asm"
+        exclude group:"asm"
+    }
 }
