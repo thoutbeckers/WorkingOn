@@ -233,7 +233,7 @@ public class WorkingOn {
 
 
         Set<Module> modules = new LinkedHashSet<Module>();
-        Set<String> packages = new HashSet<String>();
+        Set<String> loadedPackageBaseModules = new HashSet<String>();
         Map<Class<? extends Module>, Module> rootModuleOverrides = new HashMap<Class<? extends Module>, Module>();
 
         List<Class<? extends Module>> modulesToAdd = new ArrayList<Class<? extends Module>>();
@@ -242,9 +242,14 @@ public class WorkingOn {
 
         for (Class<? extends Module> moduleClass: moduleClasses) {
             String packageName = moduleClass.getPackage().getName();
-            if (!packages.contains(packageName))
-                for (String task: tasks)
-                    addModule(application, modules, packageName + "." + task.toLowerCase() + "." + task, null, null);
+
+                for (String task: tasks) {
+                    String fullPackageBaseModuleName = packageName + "." + task.toLowerCase() + "." + task;
+                    if (!loadedPackageBaseModules.contains(fullPackageBaseModuleName)) {
+                        addModule(application, modules, fullPackageBaseModuleName, null, null);
+                        loadedPackageBaseModules.add(fullPackageBaseModuleName);
+                    }
+                }
 
             String className = moduleClass.getSimpleName();
 
