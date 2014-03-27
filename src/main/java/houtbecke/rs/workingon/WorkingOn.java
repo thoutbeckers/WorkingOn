@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class WorkingOn {
      * When you add a task to this list it will be used when loadModules is invoked (but only if the
      * application is built as debuggable in case the onlyOverrideWhenInDebugMode flag is set.
      *
-     * This is done by attempting to override (in case the @OverrideModule annotation is present) or
+     * This is done by attempting to override (in case the @OverridesModule annotation is present) or
      * replacing the module with one from a subpackage of the same name as this task. Optionally you can
      * give your replacement/overriding module a suffix of the same name as the text.
      *
@@ -95,6 +96,9 @@ public class WorkingOn {
 
     /**
      * The classes of extra modules that should be loaded in addition to the ones passed to loadModules.
+     *
+     * Extra modules are loaded after regular modules coming from loadModules, and can replace a regular
+     * module by using the OverridesModule annotation.
      *
      * If the onlyOverrideWhenInDebugMode flag is passed to loadModules and the application is not
      * debuggable or running in test mode the extra modules specified here will not be loaded.
@@ -148,12 +152,12 @@ public class WorkingOn {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
-    protected static Module getModule(Context context, String fullName, Module rootModuleToOverride, Class<? extends Module> rootModuleClass) throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    protected static Module getModule(Context context, String fullName, Module rootModuleToOverride, Class<? extends Module> rootModuleClass, Set<Module> existingModules) throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class moduleClass = Class.forName(fullName);
-        return getModule(context, moduleClass, rootModuleToOverride, rootModuleClass);
+        return getModule(context, moduleClass, rootModuleToOverride, rootModuleClass, existingModules);
     }
 
-    protected static Module getModule(Context context, Class moduleClass, Module moduleToOverride, Class<? extends Module> rootModuleClass) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    protected static Module getModule(Context context, Class moduleClass, Module moduleToOverride, Class<? extends Module> rootModuleClass, Set<Module> existingModules) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         Module module = null;
         for (Constructor constructor: moduleClass.getConstructors()) {
             Class[] parameterTypes = constructor.getParameterTypes();
@@ -169,13 +173,28 @@ public class WorkingOn {
         if (moduleToOverride != null && classToOverrideWithModuleClass != null && classToOverrideWithModuleClass == rootModuleClass)
             return Modules.override(moduleToOverride).with(module);
 
-        if (classToOverrideWithModuleClass != null)
-            return Modules.override(getModule(context, classToOverrideWithModuleClass, null, null)).with(module);
+        if (classToOverrideWithModuleClass != null) {
+            Module overrideModule = null;
+            if (existingModules != null) {
+                Iterator<Module> it = existingModules.iterator();
+                while (it.hasNext()) {
+                    Module existingModule = it.next();
+                    if (existingModule.getClass().equals(classToOverrideWithModuleClass)) {
+                        it.remove();
+                        overrideModule = existingModule;
+                    }
+                }
+            }
+            if (overrideModule == null)
+                overrideModule = getModule(context, classToOverrideWithModuleClass, null, null, existingModules);
+
+            return Modules.override(overrideModule).with(module);
+        }
         return module;
     }
 
-    protected Module getModule(Context context, String packageName, String className, Module moduleToOverride, Class<? extends Module> rootModuleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        return getModule(context, packageName+"."+className, moduleToOverride, rootModuleClass);
+    protected Module getModule(Context context, String packageName, String className, Module moduleToOverride, Class<? extends Module> rootModuleClass, Set<Module> existingModules) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+        return getModule(context, packageName+"."+className, moduleToOverride, rootModuleClass, existingModules);
     }
 
     /**
@@ -184,7 +203,7 @@ public class WorkingOn {
      * if moduleFullClassName points to a non-existing class this method will do nothing.
      *
      * @param context Context used for checking if the application is in debug mode.
-     * @param moduleList List the Module should be added to or replace the last entry from, if a
+     * @param moduleSet Set the Module should be added to or replace the last entry from, if a
      *                   module can be created.
      * @param moduleFullClassName The fully qualified name of the Class
      * @return true if a module was added, false if no module was added
@@ -194,11 +213,11 @@ public class WorkingOn {
      * @throws InvocationTargetException Thrown if a Class was found but could not instantiated.
      *                                   Make sure you have a no-args or single boolean arg constructor.
      */
-    protected static Module addModule(Context context, Set<Module> moduleList, String moduleFullClassName, Module moduleToOverride, Class<? extends Module> rootModuleClass) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    protected static Module addModule(Context context, Set<Module> moduleSet, String moduleFullClassName, Module moduleToOverride, Class<? extends Module> rootModuleClass) throws IllegalAccessException, InstantiationException, InvocationTargetException {
         try {
-            Module m = getModule(context, moduleFullClassName, moduleToOverride, rootModuleClass);
+            Module m = getModule(context, moduleFullClassName, moduleToOverride, rootModuleClass, moduleSet);
             if (m != null) {
-                moduleList.add(m);
+                moduleSet.add(m);
                 return m;
             }
         } catch (ClassNotFoundException ignore) { /* we simply do not add this class if it's not found */}
@@ -225,7 +244,7 @@ public class WorkingOn {
             Module[] modules = new Module[moduleClasses.length + 1];
             modules[0] = RoboGuice.newDefaultRoboModule(application);
             for (int k=0; k < moduleClasses.length; k++) {
-                modules[k+1]=getModule(application, moduleClasses[k], null, null);
+                modules[k+1]=getModule(application, moduleClasses[k], null, null, null);
             }
             RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules);
             return;
@@ -296,8 +315,9 @@ public class WorkingOn {
                 }
                 addedAnyTask |= addedModule != null;
             }
-            if (!addedAnyTask)
+            if (!addedAnyTask) {
                 addModule(application, modules, moduleClass.getName(), null, null);
+            }
 
         }
 
