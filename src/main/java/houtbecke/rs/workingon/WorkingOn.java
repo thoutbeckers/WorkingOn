@@ -240,7 +240,7 @@ public class WorkingOn {
         modulesToAdd.addAll(Arrays.asList(moduleClasses));
         modulesToAdd.addAll(extraModuleClasses);
 
-        for (Class<? extends Module> moduleClass: moduleClasses) {
+        for (Class<? extends Module> moduleClass: modulesToAdd) {
             String packageName = moduleClass.getPackage().getName();
 
                 for (String task: tasks) {
