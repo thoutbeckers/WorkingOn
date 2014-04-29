@@ -1,0 +1,2 @@
+include ':WorkingOn-core'
+include ':WorkingOn-test'
