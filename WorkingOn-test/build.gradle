@@ -20,6 +20,11 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+
+    lintOptions {
+        disable 'InvalidPackage', 'AllowBackup'
+
+    }
 }
 
 repositories {
