@@ -1,0 +1,47 @@
+apply plugin: 'android-library'
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.0.3'
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
+}
+
+repositories {
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+dependencies {
+    provided project(':WorkingOn-core')
+
+    provided ('org.roboguice:roboguice:2.0') {
+        exclude group:"aopalliance"
+        exclude group:"cglib"
+        exclude group:"org.ow2.asm"
+        exclude group:"asm"
+    }
+
+    provided ('org.robolectric:robolectric:2.3-SNAPSHOT') {
+        exclude group:"com.android.support"
+    }
+
+    provided 'junit:junit:4.11'
+
+
+}
