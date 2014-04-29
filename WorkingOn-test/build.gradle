@@ -22,6 +22,7 @@ android {
     }
 
     lintOptions {
+        // disable scanning in robolectric packages, and we don't expose any backup data
         disable 'InvalidPackage', 'AllowBackup'
 
     }

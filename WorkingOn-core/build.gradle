@@ -16,6 +16,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    lintOptions {
+        // we don't expose any backup data
+        disable 'AllowBackup'
+
+    }
 }
 
 dependencies {
