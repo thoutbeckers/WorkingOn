@@ -22,8 +22,8 @@ android {
     }
 
     lintOptions {
-        // disable scanning in robolectric packages, and we don't expose any backup data
-        disable 'InvalidPackage', 'AllowBackup'
+        // we don't expose any backup data
+        disable 'AllowBackup'
 
     }
 }
@@ -43,12 +43,5 @@ dependencies {
         exclude group:"org.ow2.asm"
         exclude group:"asm"
     }
-
-    provided ('org.robolectric:robolectric:2.3-SNAPSHOT') {
-        exclude group:"com.android.support"
-    }
-
-    provided 'junit:junit:4.11'
-
 
 }

@@ -1,2 +1,3 @@
 include ':WorkingOn-core'
-include ':WorkingOn-test'
+include ':WorkingOn-androidTest'
+include ':WorkingOn-robolectricTest'
