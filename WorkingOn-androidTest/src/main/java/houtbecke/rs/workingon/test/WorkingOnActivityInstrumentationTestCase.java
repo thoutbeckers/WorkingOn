@@ -5,6 +5,7 @@ import roboguice.RoboGuice;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
 
 public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
 
@@ -12,9 +13,11 @@ public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extend
 		super(activityClass);
 	}
 
+
+
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
+        super.setUp();
         WorkingOn.configureTestTasks(this.getClass());
 		T activity = getActivity();
 		RoboGuice.injectMembers(activity, this);

@@ -83,7 +83,7 @@ public class WorkingOn {
      * replaces instead of overrides a module both the overridden and replacement module will be present. Be aware
      * this could lead to double bindings which will cause an error.
      */
-    public static Set<String> tasks = new LinkedHashSet<String>(0);
+    public static Set<String> tasks = new LinkedHashSet<>(0);
 
     /**
      * The extra modules that should be loaded in addition to the ones passed to loadModules.
@@ -92,7 +92,7 @@ public class WorkingOn {
      * debuggable or running in test mode the extra modules specified here will not be loaded.
      *
      */
-    public static Set<Module> extraModules = new LinkedHashSet<Module>(0);
+    public static Set<Module> extraModules = new LinkedHashSet<>(0);
 
     /**
      * The classes of extra modules that should be loaded in addition to the ones passed to loadModules.
@@ -104,8 +104,7 @@ public class WorkingOn {
      * debuggable or running in test mode the extra modules specified here will not be loaded.
      *
      */
-    public static Set<Class<? extends Module>> extraModuleClasses = new LinkedHashSet<Class<? extends Module>>(0);
-
+    public static Set<Class<? extends Module>> extraModuleClasses = new LinkedHashSet<>(0);
 
     /**
      *
@@ -114,6 +113,56 @@ public class WorkingOn {
      *
      */
     public static boolean isTesting = false;
+
+
+    private static boolean configurationNeeded = true;
+
+    private static String configurationConfigClassName;
+    private static Application configurationApplication;
+    private static boolean configurationOnlyOverrideWhenInDebugMode;
+    private static Class<? extends Module>[] configurationModuleClasses;
+
+    /**
+     * Set the configuration of this application. When the configuration is loaded calls are made to
+     * initConfigClass and loadModules with the supplied parameters.
+     *
+     * @param configClassName
+     * @param application
+     * @param onlyOverrideWhenInDebugMode
+     * @param moduleClasses
+     */
+    public static void configuration(String configClassName, Application application, boolean onlyOverrideWhenInDebugMode, Class<? extends Module>... moduleClasses) {
+        configurationConfigClassName = configClassName;
+        configurationApplication = application;
+        configurationOnlyOverrideWhenInDebugMode = onlyOverrideWhenInDebugMode;
+        configurationModuleClasses = moduleClasses;
+    }
+
+    /**
+     * Loads the configuration provided with the configuration methods, and loads it if it's not been loaded before,
+     * or if a new test was started, or prepareApplicationConfigurationRestart was invoked.
+     */
+    public static void loadConfigurationIfNeeded() {
+        if (configurationNeeded) {
+            configurationNeeded = false;
+            try {
+                initConfigClass(configurationConfigClassName);
+                loadModules(configurationApplication, configurationOnlyOverrideWhenInDebugMode,configurationModuleClasses);
+            } catch (IllegalAccessException | InvocationTargetException| InstantiationException e) {
+                throw new RuntimeException("Could not load configuration for WorkingOn", e);
+            }
+        }
+    }
+
+    /**
+     * Prepares the application for a reloading of it's configuration
+     */
+    public static void prepareApplicationConfigurationRestart() {
+
+        if (!configurationNeeded && configurationApplication instanceof WorkingOnApplication)
+            ((WorkingOnApplication) configurationApplication).stopWorkingOn();
+        configurationNeeded = true;
+    }
 
     private static void initConfigClass(Class c) {
         if (isTesting) return;
@@ -225,6 +274,7 @@ public class WorkingOn {
     }
 
 
+
     /**
      * Loads the modules with overrides based on the task field when appropriate.
      *
@@ -240,6 +290,10 @@ public class WorkingOn {
      * @param moduleClasses Classes of the modules to override and/or load.
      */
     public static void loadModules(Application application, boolean onlyOverrideWhenInDebugMode, Class<? extends Module>... moduleClasses) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+
+        if (moduleClasses == null)
+            moduleClasses = new Class[0];
+
         if (onlyOverrideWhenInDebugMode && !isInDebugMode(application) && !isTesting) {
             Module[] modules = new Module[moduleClasses.length + 1];
             modules[0] = RoboGuice.newDefaultRoboModule(application);
@@ -252,11 +306,13 @@ public class WorkingOn {
 
 
         Set<Module> modules = new LinkedHashSet<Module>();
-        Set<String> loadedPackageBaseModules = new HashSet<String>();
-        Map<Class<? extends Module>, Module> rootModuleOverrides = new HashMap<Class<? extends Module>, Module>();
+        Set<String> loadedPackageBaseModules = new HashSet<>();
+        Map<Class<? extends Module>, Module> rootModuleOverrides = new HashMap<>();
 
-        List<Class<? extends Module>> modulesToAdd = new ArrayList<Class<? extends Module>>();
+        List<Class<? extends Module>> modulesToAdd = new ArrayList<>();
+
         modulesToAdd.addAll(Arrays.asList(moduleClasses));
+
         modulesToAdd.addAll(extraModuleClasses);
 
         for (Class<? extends Module> moduleClass: modulesToAdd) {
@@ -323,7 +379,9 @@ public class WorkingOn {
 
         modules.addAll(extraModules);
         modules.add(RoboGuice.newDefaultRoboModule(application));
-        RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[]{}));
+        RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[modules.size()]));
+        RoboGuice.getInjector(application).injectMembersWithoutViews(application);
+        ((WorkingOnApplication) application).startWorkingOn();
 
     }
 
@@ -366,7 +424,6 @@ public class WorkingOn {
      * @param testClass the testClass that will be scanned for annotations
      */
     public static void configureTestTasks(Class<?> testClass) {
-
         isTesting = true;
 
         tasks.clear();
@@ -398,5 +455,6 @@ public class WorkingOn {
             extraModuleClasses.addAll(Arrays.asList(annotatedModules.value()));
         }
 
+        configurationNeeded = true;
     }
 }
