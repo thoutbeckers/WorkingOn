@@ -20,8 +20,13 @@ android {
     lintOptions {
         // we don't expose any backup data
         disable 'AllowBackup'
-
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
 }
 
 dependencies {
