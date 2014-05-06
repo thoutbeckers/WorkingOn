@@ -9,11 +9,9 @@ import android.util.Log;
 
 public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
 
-	public WorkingOnActivityInstrumentationTestCase(Class<T> activityClass) {
+	protected WorkingOnActivityInstrumentationTestCase(Class<T> activityClass) {
 		super(activityClass);
 	}
-
-
 
 	@Override
 	protected void setUp() throws Exception {
