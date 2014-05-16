@@ -301,6 +301,8 @@ public class WorkingOn {
                 modules[k+1]=getModule(application, moduleClasses[k], null, null, null);
             }
             RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules);
+            if (application instanceof WorkingOnApplication)
+                ((WorkingOnApplication) application).startWorkingOn();
             return;
         }
 
@@ -381,7 +383,8 @@ public class WorkingOn {
         modules.add(RoboGuice.newDefaultRoboModule(application));
         RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[modules.size()]));
         RoboGuice.getInjector(application).injectMembersWithoutViews(application);
-        ((WorkingOnApplication) application).startWorkingOn();
+        if (application instanceof WorkingOnApplication)
+            ((WorkingOnApplication) application).startWorkingOn();
 
     }
 
