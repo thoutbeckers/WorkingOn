@@ -47,7 +47,7 @@ public class WorkingOn {
      *
      * Typically the activity opened in your manifest should check this value and forward you there if needed.
      */
-    public static Activity activity;
+    public static Class activity;
 
     /**
      * The class of the Fragment you're working on in your app
@@ -448,7 +448,7 @@ public class WorkingOn {
         WorkingOnActivity annotatedActivity = testClass.getAnnotation(WorkingOnActivity.class);
         if (annotatedActivity != null)
             try {
-                WorkingOn.activity = annotatedActivity.value().newInstance();
+                WorkingOn.activity = annotatedActivity.value();
             } catch (Exception e) {
                 // ignore Activities with incorrect constructors
             }
