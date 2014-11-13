@@ -47,7 +47,7 @@ public class WorkingOn {
      *
      * Typically the activity opened in your manifest should check this value and forward you there if needed.
      */
-    public static Class activity;
+    public static Class<? extends Activity> activity;
 
     /**
      * The class of the Fragment you're working on in your app
