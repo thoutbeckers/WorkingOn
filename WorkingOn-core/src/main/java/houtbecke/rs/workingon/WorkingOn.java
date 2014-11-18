@@ -307,7 +307,7 @@ public class WorkingOn {
         }
 
 
-        Set<Module> modules = new LinkedHashSet<Module>();
+        Set<Module> modules = new LinkedHashSet<>();
         Set<String> loadedPackageBaseModules = new HashSet<>();
         Map<Class<? extends Module>, Module> rootModuleOverrides = new HashMap<>();
 
@@ -374,7 +374,32 @@ public class WorkingOn {
                 addedAnyTask |= addedModule != null;
             }
             if (!addedAnyTask) {
-                addModule(application, modules, moduleClass.getName(), null, null);
+
+                Class<? extends Module> rootClass = rootClassToOverrideFor(moduleClass);
+                if (rootClass != null) { // check if this module wants to override another module outside of a task
+                    Module currentlyOverriding = rootModuleOverrides.remove(rootClass);
+                    if (currentlyOverriding != null) {
+                        // there is already another module doing this so will will override that module and replace it
+                        modules.remove(currentlyOverriding);
+                        Module m = addModule(application, modules, moduleClass.getName(), currentlyOverriding, currentlyOverriding.getClass());
+                        rootModuleOverrides.put(rootClass, m);
+                    }
+                    else {
+                        // we are the first to attempt to override this module, find the module, then override it and replace it with ourselves
+                        Module moduleToOverride = null;
+                        for (Module m: modules) {
+                            if (m.getClass().equals(rootClass))
+                                moduleToOverride = m;
+                        }
+                        if (moduleToOverride != null) {
+                            modules.remove(moduleToOverride);
+                            Module m = addModule(application, modules, moduleClass.getName(), moduleToOverride, moduleToOverride.getClass());
+                            rootModuleOverrides.put(rootClass, m);
+                        }
+                        else throw new RuntimeException("Trying to override "+rootClass.getName()+" but that module was never loaded");
+                    }
+                } else // this module doesn't try to override anything, just add it
+                    addModule(application, modules, moduleClass.getName(), null, null);
             }
 
         }
