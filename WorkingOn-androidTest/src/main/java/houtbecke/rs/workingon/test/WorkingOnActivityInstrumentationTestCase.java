@@ -4,6 +4,7 @@ import houtbecke.rs.workingon.WorkingOn;
 import roboguice.RoboGuice;
 
 import android.app.Activity;
+import android.support.test.InstrumentationRegistry;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
@@ -17,6 +18,9 @@ public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extend
 	protected void setUp() throws Exception {
         super.setUp();
         WorkingOn.configureTestTasks(this.getClass());
+
+        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
+
 		T activity = getActivity();
 		RoboGuice.injectMembers(activity, this);
 	}

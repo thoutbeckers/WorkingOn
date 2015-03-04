@@ -42,6 +42,8 @@ repositories {
 dependencies {
     provided project(':WorkingOn-core')
 
+    provided ("com.android.support.test:testing-support-lib:0.1")
+
     provided ('org.roboguice:roboguice:2.0') {
         exclude group:"aopalliance"
         exclude group:"cglib"
