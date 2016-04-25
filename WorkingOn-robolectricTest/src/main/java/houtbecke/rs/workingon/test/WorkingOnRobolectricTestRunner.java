@@ -1,9 +1,9 @@
 package houtbecke.rs.workingon.test;
 
 import org.junit.runners.model.InitializationError;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 
-public class WorkingOnRobolectricTestRunner extends RobolectricTestRunner {
+public class WorkingOnRobolectricTestRunner extends RobolectricGradleTestRunner {
 
     public WorkingOnRobolectricTestRunner(Class<?> testClass) throws InitializationError {
         super(testClass);
