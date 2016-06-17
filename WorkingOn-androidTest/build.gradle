@@ -41,7 +41,7 @@ repositories {
 dependencies {
     provided project(':WorkingOn-core')
 
-    provided ('org.roboguice:roboguice:2.0') {
+    provided ('org.roboguice:roboguice:3.0-alpha-2') {
         exclude group:"aopalliance"
         exclude group:"cglib"
         exclude group:"org.ow2.asm"
