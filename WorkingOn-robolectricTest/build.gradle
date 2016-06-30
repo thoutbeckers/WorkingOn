@@ -10,5 +10,5 @@ dependencies {
     compile ('org.robolectric:robolectric:3.0') {
         exclude group:"com.android.support"
     }
-    compile 'junit:junit:4.12'
+    compile "junit:junit:${junitVersion}"
 }

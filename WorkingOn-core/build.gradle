@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    compileSdkVersion compileSdkVersionProp.toInteger()
+    buildToolsVersion "$buildToolsVersionProp"
     defaultConfig {
         minSdkVersion 8
-        targetSdkVersion 23
+        targetSdkVersion targetSdkVersionProp.toInteger()
         versionCode 1
         versionName "1.0"
     }
@@ -28,7 +28,7 @@ android {
 }
 
 dependencies {
-    provided('org.roboguice:roboguice:3.0-alpha-2') {
+    provided("org.roboguice:roboguice:${roboGuiceVersion}") {
         exclude group: "aopalliance"
         exclude group: "cglib"
         exclude group: "org.ow2.asm"
