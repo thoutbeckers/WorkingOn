@@ -300,7 +300,7 @@ public class WorkingOn {
             for (int k=0; k < moduleClasses.length; k++) {
                 modules[k+1]=getModule(application, moduleClasses[k], null, null, null);
             }
-            RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules);
+            RoboGuice.getOrCreateBaseApplicationInjector(application, Stage.PRODUCTION, modules);
             if (application instanceof WorkingOnApplication)
                 ((WorkingOnApplication) application).startWorkingOn();
             return;
@@ -406,7 +406,7 @@ public class WorkingOn {
 
         modules.addAll(extraModules);
         modules.add(RoboGuice.newDefaultRoboModule(application));
-        RoboGuice.setBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[modules.size()]));
+        RoboGuice.getOrCreateBaseApplicationInjector(application, Stage.PRODUCTION, modules.toArray(new Module[modules.size()]));
         RoboGuice.getInjector(application).injectMembersWithoutViews(application);
         if (application instanceof WorkingOnApplication)
             ((WorkingOnApplication) application).startWorkingOn();
