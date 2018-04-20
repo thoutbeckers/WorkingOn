@@ -148,7 +148,11 @@ public class WorkingOn {
             try {
                 initConfigClass(configurationConfigClassName);
                 loadModules(configurationApplication, configurationOnlyOverrideWhenInDebugMode,configurationModuleClasses);
-            } catch (IllegalAccessException | InvocationTargetException| InstantiationException e) {
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Could not load configuration for WorkingOn", e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException("Could not load configuration for WorkingOn", e);
+            } catch (InstantiationException e) {
                 throw new RuntimeException("Could not load configuration for WorkingOn", e);
             }
         }

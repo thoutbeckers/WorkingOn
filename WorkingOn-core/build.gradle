@@ -20,15 +20,15 @@ android {
         disable 'AllowBackup'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     productFlavors {
     }
 }
 
 dependencies {
-    provided("org.roboguice:roboguice:${roboGuiceVersion}") {
+    compileOnly("org.roboguice:roboguice:${roboGuiceVersion}") {
         exclude group: "aopalliance"
         exclude group: "cglib"
         exclude group: "org.ow2.asm"
