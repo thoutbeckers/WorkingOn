@@ -28,6 +28,7 @@ android {
 }
 
 dependencies {
+    implementation "com.android.support:appcompat-v7:${supportVersion}"
     compileOnly("org.roboguice:roboguice:${roboGuiceVersion}") {
         exclude group: "aopalliance"
         exclude group: "cglib"
