@@ -48,4 +48,6 @@ dependencies {
         exclude group:"asm"
     }
 
+    compile "junit:junit:${junitVersion}"
+
 }

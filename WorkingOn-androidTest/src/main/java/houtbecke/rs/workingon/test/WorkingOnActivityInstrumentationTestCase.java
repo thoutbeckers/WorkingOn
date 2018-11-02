@@ -4,16 +4,19 @@ import houtbecke.rs.workingon.WorkingOn;
 import roboguice.RoboGuice;
 
 import android.app.Activity;
-import android.test.ActivityInstrumentationTestCase2;
+import androidx.test.rule.ActivityTestRule;
 import android.util.Log;
 
-public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
+import org.junit.Before;
+import org.junit.After;
+
+public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityTestRule<T> {
 
 	protected WorkingOnActivityInstrumentationTestCase(Class<T> activityClass) {
 		super(activityClass);
 	}
 
-	@Override
+	@Before
 	protected void setUp() throws Exception {
         super.setUp();
         WorkingOn.configureTestTasks(this.getClass());
@@ -21,7 +24,7 @@ public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extend
 		RoboGuice.injectMembers(activity, this);
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		getActivity().finish();
 		super.tearDown();
