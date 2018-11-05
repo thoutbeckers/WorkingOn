@@ -1,14 +1,13 @@
 package houtbecke.rs.workingon.test;
 
+import androidx.test.rule.ActivityTestRule;
 import houtbecke.rs.workingon.WorkingOn;
 import roboguice.RoboGuice;
 
 import android.app.Activity;
-import androidx.test.rule.ActivityTestRule;
-import android.util.Log;
 
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 
 public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityTestRule<T> {
 
@@ -18,8 +17,7 @@ public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extend
 
 	@Before
 	protected void setUp() throws Exception {
-        super.setUp();
-        WorkingOn.configureTestTasks(this.getClass());
+		WorkingOn.configureTestTasks(this.getClass());
 		T activity = getActivity();
 		RoboGuice.injectMembers(activity, this);
 	}
@@ -27,7 +25,6 @@ public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extend
 	@After
 	public void tearDown() throws Exception {
 		getActivity().finish();
-		super.tearDown();
 	}
-	
+
 }
