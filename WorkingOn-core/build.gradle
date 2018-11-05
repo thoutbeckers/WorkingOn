@@ -4,7 +4,7 @@ android {
     compileSdkVersion compileSdkVersionProp.toInteger()
     buildToolsVersion "$buildToolsVersionProp"
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion minSdkVersionProp
         targetSdkVersion targetSdkVersionProp.toInteger()
         versionCode 1
         versionName "1.0"
@@ -28,7 +28,7 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:appcompat-v7:${supportVersion}"
+    implementation "androidx.appcompat:appcompat:${appCompatVersion}"
     compileOnly("org.roboguice:roboguice:${roboGuiceVersion}") {
         exclude group: "aopalliance"
         exclude group: "cglib"

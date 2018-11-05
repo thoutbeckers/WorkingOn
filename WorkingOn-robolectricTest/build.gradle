@@ -7,8 +7,8 @@ repositories {
 }
 
 dependencies {
-    compile ('org.robolectric:robolectric:3.0') {
+    implementation ('org.robolectric:robolectric:3.0') {
         exclude group:"com.android.support"
     }
-    compile "junit:junit:${junitVersion}"
+    implementation "junit:junit:${junitVersion}"
 }

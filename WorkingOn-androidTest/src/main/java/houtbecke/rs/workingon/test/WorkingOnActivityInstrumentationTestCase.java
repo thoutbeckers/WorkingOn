@@ -1,30 +1,30 @@
 package houtbecke.rs.workingon.test;
 
+import androidx.test.rule.ActivityTestRule;
 import houtbecke.rs.workingon.WorkingOn;
 import roboguice.RoboGuice;
 
 import android.app.Activity;
-import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 
-public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
+import org.junit.After;
+import org.junit.Before;
+
+public class WorkingOnActivityInstrumentationTestCase<T extends Activity> extends ActivityTestRule<T> {
 
 	protected WorkingOnActivityInstrumentationTestCase(Class<T> activityClass) {
 		super(activityClass);
 	}
 
-	@Override
+	@Before
 	protected void setUp() throws Exception {
-        super.setUp();
-        WorkingOn.configureTestTasks(this.getClass());
+		WorkingOn.configureTestTasks(this.getClass());
 		T activity = getActivity();
 		RoboGuice.injectMembers(activity, this);
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		getActivity().finish();
-		super.tearDown();
 	}
-	
+
 }

@@ -4,7 +4,7 @@ android {
     compileSdkVersion compileSdkVersionProp.toInteger()
     buildToolsVersion "$buildToolsVersionProp"
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion minSdkVersionProp
         targetSdkVersion targetSdkVersionProp.toInteger()
         versionCode 1
         versionName "1.0"
@@ -39,13 +39,16 @@ repositories {
 }
 
 dependencies {
-    provided project(':WorkingOn-core')
+    compileOnly project(':WorkingOn-core')
 
-    provided ("org.roboguice:roboguice:${roboGuiceVersion}") {
+    compileOnly ("org.roboguice:roboguice:${roboGuiceVersion}") {
         exclude group:"aopalliance"
         exclude group:"cglib"
         exclude group:"org.ow2.asm"
         exclude group:"asm"
     }
+
+    implementation "junit:junit:${junitVersion}"
+    implementation "androidx.test:rules:1.1.0"
 
 }

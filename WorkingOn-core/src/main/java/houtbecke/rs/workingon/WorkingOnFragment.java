@@ -1,6 +1,6 @@
 package houtbecke.rs.workingon;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
